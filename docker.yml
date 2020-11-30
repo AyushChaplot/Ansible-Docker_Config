@@ -1,0 +1,77 @@
+- hosts: all
+  tasks:
+        - file:
+                path: "/dvd1"
+                state: directory
+
+        - mount: 
+                path: "/dvd1"
+                src: "/dev/cdrom"
+                fstype: "iso9660"
+                state: mounted 
+        
+        - yum_repository:
+                name: "dvd1"
+                description: "my yum repo dvd1"
+                baseurl: "/dvd1/AppStream"
+                gpgcheck: no
+        
+        - yum_repository:
+                name: "dvd2"
+                description: "my yum repo dvd2"
+                baseurl: "/dvd1/BaseOS"
+                gpgcheck: no
+        
+        - yum_repository:
+                name: "docker"
+                description: "docker repo"
+                baseurl: "http://download.docker.com/linux/centos/7/x86_64/stable"
+                gpgcheck: no
+
+        - name: "installing docker-ce"
+          command: "yum install docker-ce --nobest -y"
+
+        - service:
+                name: "docker"    
+                state: started 
+                enabled: yes        
+        
+        - name: "installing python3"        
+          package:
+                name: python3  
+                state: present
+        
+        - name: "installing pip3"
+          pip: 
+                name: docker-py
+
+        - name: pull docker images
+          community.general.docker_image:
+                name: httpd
+                source: pull
+
+        - file:
+               path: /data1
+               state: directory
+
+        - name: copying html code
+          copy: 
+               content: "My Ansible Web-Server!!!\n" 
+               dest: "/data1/demo.html"
+                        
+
+        - name: launching a docker conatiner
+          community.general.docker_container:
+                name: ansible_http123
+                image: httpd
+                exposed_ports: 80
+                ports: 8080:80
+                volumes: /data1:/usr/local/apache2/htdocs
+                        
+       
+        - name: Stopping firewall 
+          service:
+                name: firewalld
+                state: stopped        
+                
+
