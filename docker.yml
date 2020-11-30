@@ -57,7 +57,7 @@
         - name: copying html code
           copy: 
                content: "My Ansible Web-Server!!!\n" 
-               dest: "/data1/demo.html"
+               dest: "/data1/test.html"
                         
 
         - name: launching a docker conatiner
